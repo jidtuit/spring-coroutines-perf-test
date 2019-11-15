@@ -1,0 +1,11 @@
+spring:
+  r2dbc:
+    #url: "r2dbc:pool:postgresql://127.0.0.1:15432/prueba"
+    url: "r2dbc:pool:postgresql://192.168.1.55:15432/prueba"
+    username: "admin"
+    password: "admin"
+    pool:
+      initial-size: 100
+      max-size: 500
+      max-idle-time: 30m
+      validation-query: "SELECT 1"
