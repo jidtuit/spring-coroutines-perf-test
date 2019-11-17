@@ -1,11 +1,13 @@
-package org.jid.tests.springcoroutinesperftest.springcoroutines
+package org.jid.tests.sbperftest.coroutines
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class SpringCoroutinesApplication {}
+class SpringCoroutinesApp { }
 
 fun main(args: Array<String>) {
-    runApplication<SpringCoroutinesApplication>(*args)
+    runApplication<SpringCoroutinesApp>(*args)
 }
+
+

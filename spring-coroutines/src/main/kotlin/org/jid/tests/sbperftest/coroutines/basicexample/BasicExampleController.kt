@@ -1,4 +1,4 @@
-package org.jid.tests.springcoroutinesperftest.springcoroutines.basicexample
+package org.jid.tests.sbperftest.coroutines.basicexample
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

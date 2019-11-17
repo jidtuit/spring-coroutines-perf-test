@@ -1,4 +1,4 @@
-package org.jid.tests.springcoroutinesperftest.springcoroutines.calcandsave
+package org.jid.tests.sbperftest.coroutines.calcandsave
 
 data class CalcAndSaveModel(var id: Long?,
                             val v0: String = "defaultValue0",

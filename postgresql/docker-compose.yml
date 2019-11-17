@@ -10,8 +10,6 @@ services:
       - "15432:5432"
     volumes:
       - ./temp:/var/lib/postgresql/data
-    networks:
-      - postgres-network
 
   pgadmin:
     image: dpage/pgadmin4
@@ -22,9 +20,3 @@ services:
       - "15080:80"
     depends_on:
       - postgres
-    networks:
-      - postgres-network
-
-networks:
-  postgres-network:
-    driver: bridge

@@ -1,4 +1,4 @@
-package org.jid.tests.springcoroutinesperftest.springcoroutines.calcandsave
+package org.jid.tests.sbperftest.coroutines.calcandsave
 
 import kotlinx.coroutines.flow.Flow
 import org.springframework.data.r2dbc.core.*

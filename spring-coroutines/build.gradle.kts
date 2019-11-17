@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     id("org.springframework.boot") version "2.2.1.RELEASE"
@@ -10,6 +11,7 @@ plugins {
 group = project.group
 version = project.version
 java.sourceCompatibility = JavaVersion.VERSION_11
+
 
 configurations {
     compileOnly {
