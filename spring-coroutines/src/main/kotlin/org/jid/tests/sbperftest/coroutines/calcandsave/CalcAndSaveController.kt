@@ -1,43 +1,63 @@
 package org.jid.tests.sbperftest.coroutines.calcandsave
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 
 @RestController
 @RequestMapping("/calcAndSave-suspend")
 class CalcAndSaveController(private val service: CalcAndSaveService) {
 
-    @PostMapping("/createDb")
-    suspend fun createDbConcurrent(@RequestParam("rows") rows:Optional<Int>,
-                        @RequestParam("delay") delay:Optional<Long>) {
-         (0 until rows.orElse(3)).asFlow()
-                .map{ CalcAndSaveModel(id = null) }
-                .map{
-                    delay.ifPresent(Thread::sleep)
-                    service.save(it)
-                }.collect()
-    }
-
-    @PostMapping("/createDbParallel")
-    suspend fun createDbParallel(@RequestParam("rows") rows:Optional<Int>,
-                         @RequestParam("delay") delay:Optional<Long>) {
-        (0 until rows.orElse(3)).asFlow()
-                .map{ CalcAndSaveModel(id = null) }
-                .map{
-                    GlobalScope.async {
-                        delay.ifPresent(Thread::sleep)
-                        service.save(it)
-                    }
-                }.collect{ it.await() }
-    }
-
     @GetMapping
     suspend fun findAll(): Flow<CalcAndSaveModel> = service.findAll()
+
+    @PostMapping("/createDb")
+    suspend fun createDbConcurrent(@RequestParam("rows") rows:Optional<Int>,
+                        @RequestParam("delay") delay:Optional<Long>): Flow<Unit> {
+         return (0 until rows.orElse(3)).asFlow()
+                .map{ calculateProfiles(delay) }
+                .map( service::save )
+    }
+
+    @ExperimentalCoroutinesApi
+    @PostMapping("/createDbCtxChange")
+    suspend fun createDbContextChange(@RequestParam("rows") rows:Optional<Int>,
+                         @RequestParam("delay") delay:Optional<Long>): Flow<Unit> {
+        return (0 until rows.orElse(3)).asFlow()
+                .map{ calculateProfiles(delay) }
+                .flowOn(Dispatchers.Default)
+                .map( service::save)
+                .flowOn(Dispatchers.IO)
+    }
+
+    @PostMapping("/createDbAsyncAwait")
+    suspend fun createDbAsyncAwait(@RequestParam("rows") rows:Optional<Int>,
+                                  @RequestParam("delay") delay:Optional<Long>): Flow<Unit> = coroutineScope {
+
+        val numRows = rows.orElse(3)
+
+        val calcs = mutableListOf<Deferred<CalcAndSaveModel>>()
+        (0 until numRows).forEach {
+            calcs.add( async (Dispatchers.Default) {
+                calculateProfiles(delay)
+            })
+        }
+
+        val saves = mutableListOf<Deferred<Unit>>()
+        (0 until numRows).forEach {
+            saves.add( async (Dispatchers.IO) { service.save(calcs[it].await()) })
+        }
+
+        saves.asFlow()
+                .map{ it.await() }
+    }
+
+    suspend fun calculateProfiles(delay: Optional<Long>): CalcAndSaveModel {
+        delay.ifPresent(Thread::sleep)
+        return CalcAndSaveModel(id = null)
+    }
 
 }
