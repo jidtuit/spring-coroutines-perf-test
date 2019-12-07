@@ -19,7 +19,7 @@ class CalcAndSaveController(private val service: CalcAndSaveService) {
                                    @RequestParam("delay") delay:Optional<Long>): List<Unit> {
         return (0 until rows.orElse(3))
                 .map{ calculateProfiles(delay) }
-                .map{ service.save(it) }
+                .map{ service.saveSync(it) }
 
     }
 
