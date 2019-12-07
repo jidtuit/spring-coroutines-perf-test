@@ -3,6 +3,9 @@
 ROWS=1000
 DELAY=10
 
+echo "No flow nor coroutines.."
+time curl -X POST http://localhost:8080/calcAndSave-suspend/createDbNoCoroutines\?rows\=$ROWS\&delay\=$DELAY
+
 echo "Regular flow..."
 time curl -X POST http://localhost:8080/calcAndSave-suspend/createDb\?rows\=$ROWS\&delay\=$DELAY
 

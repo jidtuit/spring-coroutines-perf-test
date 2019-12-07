@@ -14,6 +14,16 @@ class CalcAndSaveController(private val service: CalcAndSaveService) {
     @GetMapping
     suspend fun findAll(): Flow<CalcAndSaveModel> = service.findAll()
 
+    @PostMapping("/createDbNoCoroutines")
+    suspend fun createDbConcurrentNoCoroutines(@RequestParam("rows") rows:Optional<Int>,
+                                   @RequestParam("delay") delay:Optional<Long>): List<Unit> {
+        return (0 until rows.orElse(3))
+                .map{ calculateProfiles(delay) }
+                .map{ service.save(it) }
+
+    }
+
+
     @PostMapping("/createDb")
     suspend fun createDbConcurrent(@RequestParam("rows") rows:Optional<Int>,
                         @RequestParam("delay") delay:Optional<Long>): Flow<Unit> {
@@ -100,7 +110,7 @@ class CalcAndSaveController(private val service: CalcAndSaveService) {
                 .map{ it.await() }
     }
 
-    suspend fun calculateProfiles(delay: Optional<Long>): CalcAndSaveModel {
+    fun calculateProfiles(delay: Optional<Long>): CalcAndSaveModel {
         delay.ifPresent(Thread::sleep) // Active wait simulation
         return CalcAndSaveModel(id = null)
     }

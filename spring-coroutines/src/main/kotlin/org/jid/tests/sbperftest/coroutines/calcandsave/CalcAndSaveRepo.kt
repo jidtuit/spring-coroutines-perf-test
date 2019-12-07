@@ -3,6 +3,7 @@ package org.jid.tests.sbperftest.coroutines.calcandsave
 import kotlinx.coroutines.flow.Flow
 import org.springframework.data.r2dbc.core.*
 import org.springframework.stereotype.Component
+import reactor.core.publisher.toMono
 
 @Component
 internal class CalcAndSaveRepo(private val db: DatabaseClient) {
@@ -14,6 +15,14 @@ internal class CalcAndSaveRepo(private val db: DatabaseClient) {
                 .table(table)
                 .using(model)
                 .await()
+    }
+
+    fun saveSync(model: CalcAndSaveModel) {
+        db.insert().into<CalcAndSaveModel>()
+                .table(table)
+                .using(model)
+                .toMono()
+                .block();
     }
 
 
