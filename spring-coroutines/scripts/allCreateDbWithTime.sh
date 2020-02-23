@@ -21,4 +21,9 @@ time curl -X POST http://localhost:8080/calcAndSave-suspend/createDbCtxChangeBuf
 echo "async await... "
 time curl -X POST http://localhost:8080/calcAndSave-suspend/createDbAsyncAwait\?rows\=$ROWS\&delay\=$DELAY
 
+echo "async await with Buffer... "
+time curl -X POST http://localhost:8080/calcAndSave-suspend/createDbAsyncAwaitBuffer\?rows\=$ROWS\&delay\=$DELAY
+
+echo "async await without flow... "
+time curl -X POST http://localhost:8080/calcAndSave-suspend/createDbAsyncAwaitWithoutFlow\?rows\=$ROWS\&delay\=$DELAY
 

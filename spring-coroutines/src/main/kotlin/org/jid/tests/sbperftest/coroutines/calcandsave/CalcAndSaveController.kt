@@ -95,20 +95,50 @@ class CalcAndSaveController(private val service: CalcAndSaveService) {
         val numRows = rows.orElse(3)
 
         val calcs = mutableListOf<Deferred<CalcAndSaveModel>>()
-        (0 until numRows).forEach {
-            calcs.add( async (Dispatchers.Default) {
-                calculateProfiles(delay)
-            })
-        }
+        (0 until numRows).filter { isActive }
+            .forEach {
+                calcs.add( async (Dispatchers.Default) {
+                    calculateProfiles(delay)
+                })
+            }
 
         val saves = mutableListOf<Deferred<Unit>>()
-        (0 until numRows).forEach {
-            saves.add( async (Dispatchers.IO) { service.save(calcs[it].await()) })
-        }
+        (0 until numRows).filter { isActive }
+            .forEach {
+                saves.add( async (Dispatchers.IO) { service.save(calcs[it].await()) })
+            }
 
         saves.asFlow()
+                .buffer()
                 .map{ it.await() }
+
     }
+
+    @PostMapping("/createDbAsyncAwaitWithoutFlow")
+    suspend fun createDbAsyncAwaitWithoutFlow(@RequestParam("rows") rows:Optional<Int>,
+                                         @RequestParam("delay") delay:Optional<Long>): List<Unit> = coroutineScope {
+
+        // TODO: Study cancellation and exception control. Also the best way to use scope
+        val numRows = rows.orElse(3)
+
+        val calcs = mutableListOf<Deferred<CalcAndSaveModel>>()
+        (0 until numRows).filter { isActive }
+                .forEach {
+                    calcs.add( async (Dispatchers.Default) {
+                        calculateProfiles(delay)
+                    })
+                }
+
+        val saves = mutableListOf<Deferred<Unit>>()
+        (0 until numRows).filter { isActive }
+                .forEach {
+                    saves.add( async (Dispatchers.IO) { service.save(calcs[it].await()) })
+                }
+
+        saves.map{ it.await() }
+    }
+
+
 
     fun calculateProfiles(delay: Optional<Long>): CalcAndSaveModel {
         delay.ifPresent(Thread::sleep) // Active wait simulation
